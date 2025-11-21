@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictor de Rendimiento Estudiantil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 50%, #f3e8ff 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #312e81;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .model-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .model-type-card {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        .classification-card {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .regression-card {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .model-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .model-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .classification-card .model-title {
+            color: #1e3a8a;
+        }
+
+        .regression-card .model-title {
+            color: #15803d;
+        }
+
+        .model-description {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #cbd5e1;
+            margin: 2rem 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #374151;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background-color: white;
+            border: 2px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2563eb;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-hint {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .predict-button {
+            width: 100%;
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-size: 1.125rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .predict-button:hover {
+            background: linear-gradient(to right, #1d4ed8, #4338ca);
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .predict-button:active {
+            transform: scale(0.98);
+        }
+
+        .results {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            margin-bottom: 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .result-card {
+            padding: 1.5rem;
+            border: 2px solid;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .result-status {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-probability {
+            font-size: 1.1rem;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-stars {
+            font-size: 1.5rem;
+            margin: 0.75rem 0;
+        }
+
+        .result-label {
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        .result-score {
+            color: #1d4ed8;
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+
+        .pass {
+            background: #d1fae5;
+            border-color: #86efac;
+        }
+
+        .pass .result-status {
+            color: #065f46;
+        }
+
+        .fail {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        .fail .result-status {
+            color: #991b1b;
+        }
+
+        .regression-pass {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .regression-pass .result-status {
+            color: #065f46;
+        }
+
+        .regression-fail {
+            background: #fed7aa;
+            border-color: #fdba74;
+        }
+
+        .regression-fail .result-status {
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .model-types,
+            .input-grid,
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Predicción de Rendimiento Estudiantil</h1>
+
+        <div class="model-types">
+            <div class="model-type-card classification-card">
+                <div class="model-icon">🎯</div>
+                <div class="model-title">CLASIFICACIÓN</div>
+                <div class="model-description">Predice categorías (Aprueba/Reprueba)</div>
+            </div>
+            <div class="model-type-card regression-card">
+                <div class="model-icon">📈</div>
+                <div class="model-title">REGRESIÓN</div>
+                <div class="model-description">Predice valores numéricos (1.0 - 5.0)</div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>📝 Datos del Estudiante</h2>
+
+        <form id="predictionForm">
+            <div class="input-grid">
+                <div>
+                    <div class="input-group">
+                        <label for="hoursStudied">📚 Horas de Estudio</label>
+                        <input type="number" id="hoursStudied" min="0" max="12" value="5" step="1" required>
+                        <div class="input-hint">Necesitas ≥ 5 horas para aprobar</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sleepHours">🌙 Horas de Sueño</label>
+                        <input type="number" id="sleepHours" min="4" max="9" value="7" step="1" required>
+                        <div class="input-hint">Necesitas ≥ 6 horas para aprobar</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="input-group">
+                        <label for="attendance">📊 Asistencia (%)</label>
+                        <input type="number" id="attendance" min="0" max="100" value="75" step="1" required>
+                        <div class="input-hint">Necesitas ≥ 60% para aprobar</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="previousScores">📈 Calificación Anterior</label>
+                        <input type="number" id="previousScores" min="1.0" max="5.0" value="3.0" step="0.1" required>
+                        <div class="input-hint">Necesitas ≥ 3.0 para aprobar</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="predict-button">🚀 Calcular Predicción</button>
+        </form>
+
+        <div id="results" class="results">
+            <hr>
+            <h2>📊 Resultados</h2>
+            <div class="results-grid">
+                <div>
+                    <h3 style="margin-bottom: 1rem;">🎯 Clasificación</h3>
+                    <div id="classificationResult" class="result-card"></div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">📈 Regresión</h3>
+                    <div id="regressionResult" class="result-card"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to render stars
+        function renderStars(count) {
+            return '⭐'.repeat(count) + '☆'.repeat(5 - count);
+        }
+
+        // Classification: Neural Network
+        function predictNeuralNetworkClassification(hoursStudied, sleepHours, attendance, previousScores) {
+            const passed = (hoursStudied >= 5 && sleepHours >= 6 && 
+                          attendance >= 60 && previousScores >= 3.0);
+            
+            let conditionsMet = 0;
+            if (hoursStudied >= 5) conditionsMet += 25;
+            if (sleepHours >= 6) conditionsMet += 25;
+            if (attendance >= 60) conditionsMet += 25;
+            if (previousScores >= 3.0) conditionsMet += 25;
+            
+            const probability = conditionsMet;
+            let stars, label;
+            
+            if (passed) {
+                stars = 5;
+                label = 'Excelente';
+            } else {
+                if (probability >= 50) {
+                    stars = 3;
+                } else if (probability >= 25) {
+                    stars = 2;
+                } else {
+                    stars = 1;
+                }
+                label = 'Insuficiente';
+            }
+            
+            return {
+                passed: passed,
+                probability: probability,
+                stars: stars,
+                label: label
+            };
+        }
+
+        // Regression: Linear Regression
+        function predictLinearRegression(hoursStudied, sleepHours, attendance, previousScores) {
+            const passed = (hoursStudied >= 5 && sleepHours >= 6 && 
+                          attendance >= 60 && previousScores >= 3.0);
+            
+            let score;
+            if (passed) {
+                score = 3.0 + (hoursStudied / 12 * 0.5) + (sleepHours / 9 * 0.5) + 
+                        (attendance / 100 * 0.5) + (previousScores / 5.0 * 0.5);
+                score = Math.min(score, 5.0);
+            } else {
+                score = 1.0 + (hoursStudied / 12 * 0.5) + (sleepHours / 9 * 0.3) + 
+                        (attendance / 100 * 0.3) + (previousScores / 5.0 * 0.3);
+                score = Math.min(score, 2.9);
+            }
+            
+            const finalScore = Math.round(score * 10) / 10;
+            const stars = Math.round(finalScore);
+            
+            return {
+                score: finalScore,
+                passed: passed,
+                stars: stars
+            };
+        }
+
+        // Form submission handler
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get input values
+            const hoursStudied = parseFloat(document.getElementById('hoursStudied').value);
+            const sleepHours = parseFloat(document.getElementById('sleepHours').value);
+            const attendance = parseFloat(document.getElementById('attendance').value);
+            const previousScores = parseFloat(document.getElementById('previousScores').value);
+            
+            // Run predictions
+            const classification = predictNeuralNetworkClassification(hoursStudied, sleepHours, attendance, previousScores);
+            const regression = predictLinearRegression(hoursStudied, sleepHours, attendance, previousScores);
+            
+            // Display classification results
+            const classDiv = document.getElementById('classificationResult');
+            const classStatus = classification.passed ? 'Aprueba (1)' : 'Reprueba (0)';
+            const classIcon = classification.passed ? '✓' : '✗';
+            const classClass = classification.passed ? 'pass' : 'fail';
+            
+            classDiv.className = `result-card ${classClass}`;
+            classDiv.innerHTML = `
+                <div class="result-status">${classIcon} ${classStatus}</div>
+                <div class="result-probability">Probabilidad: ${classification.probability}%</div>
+                <div class="result-stars">${renderStars(classification.stars)}</div>
+                <div class="result-label">${classification.label}</div>
+            `;
+            
+            // Display regression results
+            const regDiv = document.getElementById('regressionResult');
+            const regStatus = regression.passed ? 'Aprueba' : 'Reprueba';
+            const regIcon = regression.passed ? '✓' : '✗';
+            const regClass = regression.passed ? 'regression-pass' : 'regression-fail';
+            
+            regDiv.className = `result-card ${regClass}`;
+            regDiv.innerHTML = `
+                <div class="result-status">${regIcon} ${regStatus}</div>
+                <div class="result-probability">Calificación: <span class="result-score">${regression.score}</span></div>
+                <div class="result-stars">${renderStars(regression.stars)}</div>
+                <div class="result-label">Nota: ${regression.score} / 5.0</div>
+            `;
+            
+            // Show results section
+            document.getElementById('results').classList.add('show');
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+</html>
